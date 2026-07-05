@@ -1,0 +1,4 @@
+/Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles/kvstore.dir
+/Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles/kvserver.dir
+/Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles/edit_cache.dir
+/Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles/rebuild_cache.dir
