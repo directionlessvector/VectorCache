@@ -1,0 +1,209 @@
+#!/bin/bash
+# Full regression suite for the kvstore project, focused on Day 4
+# (sharded locking) but re-validates Days 1-3 behavior too.
+#
+# Usage: ./run_all_tests.sh
+set -uo pipefail
+
+cd "$(dirname "$0")"
+FAIL=0
+
+pass() { echo "  PASS: $1"; }
+fail() { echo "  FAIL: $1"; FAIL=1; }
+
+echo "=================================================="
+echo "1. Building everything"
+echo "=================================================="
+mkdir -p build
+g++ -std=c++17 -Wall -Wextra -Isrc -pthread src/main.cpp src/store.cpp -o build/kvstore || { fail "build kvstore"; exit 1; }
+g++ -std=c++17 -Wall -Wextra -Isrc -pthread src/server_main.cpp src/server.cpp src/resp.cpp src/aof.cpp src/sharded_store.cpp src/store.cpp -o build/kvserver || { fail "build kvserver"; exit 1; }
+g++ -std=c++17 -Wall -Wextra -pthread bench/load_test.cpp -o build/bench || { fail "build bench"; exit 1; }
+g++ -std=c++17 -Wall -Wextra -Isrc -pthread bench/inprocess_bench.cpp src/sharded_store.cpp src/store.cpp -o build/inprocess_bench || { fail "build inprocess_bench"; exit 1; }
+pass "all targets built"
+
+echo ""
+echo "=================================================="
+echo "2. Unit tests"
+echo "=================================================="
+for t in ttl_test aof_test sharded_store_test sharded_store_edge_test; do
+    g++ -std=c++17 -Wall -Wextra -Isrc -pthread "tests/${t}.cpp" \
+        src/store.cpp src/aof.cpp src/resp.cpp src/sharded_store.cpp \
+        -o "/tmp/${t}" 2> "/tmp/${t}.compile.log"
+    if [ $? -ne 0 ]; then
+        fail "$t (compile error, see /tmp/${t}.compile.log)"
+        continue
+    fi
+    if timeout 15 "/tmp/${t}" > /tmp/"${t}".out 2>&1; then
+        pass "$t"
+    else
+        fail "$t (see /tmp/${t}.out)"
+    fi
+done
+
+echo ""
+echo "=================================================="
+echo "3. ThreadSanitizer stress test (data race detection)"
+echo "=================================================="
+g++ -std=c++17 -Wall -Wextra -Isrc -pthread -fsanitize=thread -g -O1 \
+    tests/sharded_store_stress_test.cpp src/sharded_store.cpp src/store.cpp -o /tmp/stress_tsan 2>/dev/null
+if timeout 30 /tmp/stress_tsan > /tmp/tsan.out 2>&1; then
+    if grep -q "WARNING: ThreadSanitizer" /tmp/tsan.out; then
+        fail "ThreadSanitizer detected a race -- see /tmp/tsan.out"
+    else
+        pass "no data races detected under adversarial contention"
+    fi
+else
+    fail "stress test crashed or hung -- see /tmp/tsan.out"
+fi
+
+echo ""
+echo "=================================================="
+echo "4. AddressSanitizer + UBSan (memory errors / UB)"
+echo "=================================================="
+g++ -std=c++17 -Wall -Wextra -Isrc -pthread -fsanitize=address,undefined -g -O1 \
+    tests/sharded_store_stress_test.cpp src/sharded_store.cpp src/store.cpp -o /tmp/stress_asan 2>/dev/null
+if timeout 30 /tmp/stress_asan > /tmp/asan.out 2>&1; then
+    pass "no memory errors or undefined behavior detected"
+else
+    fail "ASan/UBSan detected an issue -- see /tmp/asan.out"
+fi
+
+echo ""
+echo "=================================================="
+echo "5. Crash recovery with sharding (kill -9 + AOF replay)"
+echo "=================================================="
+rm -f /tmp/rt_crash.aof
+./build/kvserver 16500 --aof /tmp/rt_crash.aof --fsync always --shards 16 > /tmp/rt_crash1.log 2>&1 &
+PID1=$!
+disown
+sleep 0.5
+python3 -c "
+import socket
+def enc(*a):
+    o = f'*{len(a)}\r\n'
+    for x in a: o += f'\${len(x)}\r\n{x}\r\n'
+    return o.encode()
+s = socket.create_connection(('127.0.0.1', 16500), timeout=3)
+for i in range(20):
+    s.sendall(enc('SET', f'k{i}', f'v{i}')); s.recv(100)
+s.close()
+" || fail "crash recovery: write phase failed"
+kill -9 $PID1 2>/dev/null
+sleep 0.3
+
+./build/kvserver 16501 --aof /tmp/rt_crash.aof --fsync always --shards 16 > /tmp/rt_crash2.log 2>&1 &
+PID2=$!
+disown
+sleep 0.5
+RESULT=$(python3 -c "
+import socket
+def enc(*a):
+    o = f'*{len(a)}\r\n'
+    for x in a: o += f'\${len(x)}\r\n{x}\r\n'
+    return o.encode()
+s = socket.create_connection(('127.0.0.1', 16501), timeout=3)
+ok = True
+for i in range(20):
+    s.sendall(enc('GET', f'k{i}'))
+    r = s.recv(100)
+    if r != f'\${len(f\"v{i}\")}\r\nv{i}\r\n'.encode(): ok = False
+print('OK' if ok else 'MISMATCH')
+s.close()
+")
+kill -9 $PID2 2>/dev/null
+if [ "$RESULT" = "OK" ]; then
+    pass "all 20 keys survived kill -9 + restart with sharding enabled"
+else
+    fail "crash recovery mismatch"
+fi
+
+echo ""
+echo "=================================================="
+echo "6. Same-key concurrent race (store/AOF consistency)"
+echo "=================================================="
+rm -f /tmp/rt_race.aof
+./build/kvserver 16502 --aof /tmp/rt_race.aof --fsync always --shards 8 > /tmp/rt_race.log 2>&1 &
+PID3=$!
+disown
+sleep 0.5
+python3 -c "
+import socket, threading
+def enc(*a):
+    o = f'*{len(a)}\r\n'
+    for x in a: o += f'\${len(x)}\r\n{x}\r\n'
+    return o.encode()
+def worker(n):
+    s = socket.create_connection(('127.0.0.1', 16502), timeout=3)
+    for _ in range(30):
+        s.sendall(enc('SET', 'contested', f't{n}')); s.recv(100)
+    s.close()
+threads = [threading.Thread(target=worker, args=(i,)) for i in range(10)]
+for t in threads: t.start()
+for t in threads: t.join()
+" || fail "race test: write phase failed"
+kill -9 $PID3 2>/dev/null
+sleep 0.3
+
+LAST_AOF=$(python3 -c "
+import re
+data = open('/tmp/rt_race.aof', 'rb').read()
+m = re.findall(rb'SET\r\n\\\$9\r\ncontested\r\n\\\$\d+\r\n(t\d+)\r\n', data)
+print(m[-1].decode() if m else 'NONE')
+")
+
+./build/kvserver 16503 --aof /tmp/rt_race.aof --fsync always --shards 8 > /tmp/rt_race2.log 2>&1 &
+PID4=$!
+disown
+sleep 0.5
+REPLAYED=$(python3 -c "
+import socket
+def enc(*a):
+    o = f'*{len(a)}\r\n'
+    for x in a: o += f'\${len(x)}\r\n{x}\r\n'
+    return o.encode()
+s = socket.create_connection(('127.0.0.1', 16503), timeout=3)
+s.sendall(enc('GET', 'contested'))
+r = s.recv(100)
+s.close()
+body = r.split(b'\r\n')[1].decode() if b'\r\n' in r else ''
+print(body)
+")
+kill -9 $PID4 2>/dev/null
+if [ "$LAST_AOF" = "$REPLAYED" ]; then
+    pass "AOF's last write ('$LAST_AOF') matches replayed store state ('$REPLAYED')"
+else
+    fail "AOF/store mismatch: AOF had '$LAST_AOF', store replayed to '$REPLAYED'"
+fi
+
+echo ""
+echo "=================================================="
+echo "7. Protocol integration (real redis-cli, if installed)"
+echo "=================================================="
+if command -v redis-cli > /dev/null 2>&1; then
+    rm -f /tmp/rt_cli.aof
+    ./build/kvserver 16504 --aof /tmp/rt_cli.aof --fsync never --shards 32 > /tmp/rt_cli.log 2>&1 &
+    PID5=$!
+    disown
+    sleep 0.5
+    R1=$(redis-cli -p 16504 PING)
+    R2=$(redis-cli -p 16504 SET foo bar)
+    R3=$(redis-cli -p 16504 GET foo)
+    kill -9 $PID5 2>/dev/null
+    if [ "$R1" = "PONG" ] && [ "$R2" = "OK" ] && [ "$R3" = "bar" ]; then
+        pass "real redis-cli PING/SET/GET all correct"
+    else
+        fail "redis-cli integration: got PING=$R1 SET=$R2 GET=$R3"
+    fi
+else
+    echo "  SKIP: redis-cli not installed"
+fi
+
+echo ""
+echo "=================================================="
+if [ "$FAIL" = "0" ]; then
+    echo "ALL TEST CATEGORIES PASSED"
+else
+    echo "SOME TESTS FAILED -- see messages above"
+fi
+echo "=================================================="
+exit $FAIL

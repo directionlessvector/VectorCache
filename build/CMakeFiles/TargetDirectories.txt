@@ -3,5 +3,6 @@
 /Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles/bench.dir
 /Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles/inprocess_bench.dir
 /Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles/sharded_store_test.dir
+/Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles/sharded_store_edge_test.dir
 /Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles/edit_cache.dir
 /Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles/rebuild_cache.dir

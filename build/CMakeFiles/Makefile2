@@ -68,6 +68,7 @@ all: CMakeFiles/kvserver.dir/all
 all: CMakeFiles/bench.dir/all
 all: CMakeFiles/inprocess_bench.dir/all
 all: CMakeFiles/sharded_store_test.dir/all
+all: CMakeFiles/sharded_store_edge_test.dir/all
 .PHONY : all
 
 # The main recursive "codegen" target.
@@ -76,6 +77,7 @@ codegen: CMakeFiles/kvserver.dir/codegen
 codegen: CMakeFiles/bench.dir/codegen
 codegen: CMakeFiles/inprocess_bench.dir/codegen
 codegen: CMakeFiles/sharded_store_test.dir/codegen
+codegen: CMakeFiles/sharded_store_edge_test.dir/codegen
 .PHONY : codegen
 
 # The main recursive "preinstall" target.
@@ -88,6 +90,7 @@ clean: CMakeFiles/kvserver.dir/clean
 clean: CMakeFiles/bench.dir/clean
 clean: CMakeFiles/inprocess_bench.dir/clean
 clean: CMakeFiles/sharded_store_test.dir/clean
+clean: CMakeFiles/sharded_store_edge_test.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -225,7 +228,7 @@ CMakeFiles/inprocess_bench.dir/clean:
 CMakeFiles/sharded_store_test.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles --progress-num=17,18,19,20 "Built target sharded_store_test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles --progress-num=21,22,23,24 "Built target sharded_store_test"
 .PHONY : CMakeFiles/sharded_store_test.dir/all
 
 # Build rule for subdir invocation for target.
@@ -242,13 +245,45 @@ sharded_store_test: CMakeFiles/sharded_store_test.dir/rule
 # codegen rule for target.
 CMakeFiles/sharded_store_test.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles --progress-num=17,18,19,20 "Finished codegen for target sharded_store_test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles --progress-num=21,22,23,24 "Finished codegen for target sharded_store_test"
 .PHONY : CMakeFiles/sharded_store_test.dir/codegen
 
 # clean rule for target.
 CMakeFiles/sharded_store_test.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/clean
 .PHONY : CMakeFiles/sharded_store_test.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/sharded_store_edge_test.dir
+
+# All Build rule for target.
+CMakeFiles/sharded_store_edge_test.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_edge_test.dir/build.make CMakeFiles/sharded_store_edge_test.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_edge_test.dir/build.make CMakeFiles/sharded_store_edge_test.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles --progress-num=17,18,19,20 "Built target sharded_store_edge_test"
+.PHONY : CMakeFiles/sharded_store_edge_test.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/sharded_store_edge_test.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles 4
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/sharded_store_edge_test.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles 0
+.PHONY : CMakeFiles/sharded_store_edge_test.dir/rule
+
+# Convenience name for target.
+sharded_store_edge_test: CMakeFiles/sharded_store_edge_test.dir/rule
+.PHONY : sharded_store_edge_test
+
+# codegen rule for target.
+CMakeFiles/sharded_store_edge_test.dir/codegen:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_edge_test.dir/build.make CMakeFiles/sharded_store_edge_test.dir/codegen
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/Users/priyank/dist-key-value-store/VectorCache/build/CMakeFiles --progress-num=17,18,19,20 "Finished codegen for target sharded_store_edge_test"
+.PHONY : CMakeFiles/sharded_store_edge_test.dir/codegen
+
+# clean rule for target.
+CMakeFiles/sharded_store_edge_test.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_edge_test.dir/build.make CMakeFiles/sharded_store_edge_test.dir/clean
+.PHONY : CMakeFiles/sharded_store_edge_test.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

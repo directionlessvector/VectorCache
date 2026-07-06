@@ -59,3 +59,16 @@ add_executable(sharded_store_test
 )
 target_include_directories(sharded_store_test PRIVATE src)
 target_link_libraries(sharded_store_test PRIVATE Threads::Threads)
+
+# ------------------------------
+# Tests
+# ------------------------------
+
+add_executable(sharded_store_edge_test
+    tests/sharded_store_edge_test.cpp
+    src/sharded_store.cpp
+    src/store.cpp
+)
+
+target_include_directories(sharded_store_edge_test PRIVATE src)
+target_link_libraries(sharded_store_edge_test PRIVATE Threads::Threads)
