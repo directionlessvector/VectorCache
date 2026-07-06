@@ -12,6 +12,7 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/Users/priyank/dist-key-value-store/VectorCache/src/resp.cpp" "CMakeFiles/kvserver.dir/src/resp.cpp.o" "gcc" "CMakeFiles/kvserver.dir/src/resp.cpp.o.d"
   "/Users/priyank/dist-key-value-store/VectorCache/src/server.cpp" "CMakeFiles/kvserver.dir/src/server.cpp.o" "gcc" "CMakeFiles/kvserver.dir/src/server.cpp.o.d"
   "/Users/priyank/dist-key-value-store/VectorCache/src/server_main.cpp" "CMakeFiles/kvserver.dir/src/server_main.cpp.o" "gcc" "CMakeFiles/kvserver.dir/src/server_main.cpp.o.d"
+  "/Users/priyank/dist-key-value-store/VectorCache/src/sharded_store.cpp" "CMakeFiles/kvserver.dir/src/sharded_store.cpp.o" "gcc" "CMakeFiles/kvserver.dir/src/sharded_store.cpp.o.d"
   "/Users/priyank/dist-key-value-store/VectorCache/src/store.cpp" "CMakeFiles/kvserver.dir/src/store.cpp.o" "gcc" "CMakeFiles/kvserver.dir/src/store.cpp.o.d"
   )
 

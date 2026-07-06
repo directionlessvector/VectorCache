@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/sharded_store_test.dir/tests/sharded_store_test.cpp.o CMakeFiles/sharded_store_test.dir/src/sharded_store.cpp.o CMakeFiles/sharded_store_test.dir/src/store.cpp.o -o sharded_store_test

@@ -5,19 +5,20 @@
 #include <thread>
 #include <atomic>
 
-#include "store.h"
+#include "sharded_store.h"
 #include "aof.h"
 
-// Thread-per-connection TCP server speaking RESP2. One global mutex
-// guards the Store for now (Day 2 goal: correctness). Sharded
-// locking to reduce contention is a later, deliberate upgrade — see
-// DESIGN.md.
+// Thread-per-connection TCP server speaking RESP2. Concurrency
+// control is delegated entirely to ShardedStore -- see
+// sharded_store.h for why sharding is done as N independent Store
+// instances rather than fine-grained locks inside one big table.
 class Server {
 public:
     // aof_path: where the append-only log lives. policy: durability
-    // tradeoff (see aof.h for the always/every-second/never
-    // tradeoffs written out in full).
-    Server(int port, const std::string& aof_path, FsyncPolicy policy);
+    // tradeoff (see aof.h). num_shards: 1 reproduces the old
+    // single-global-mutex behavior exactly (useful as a benchmark
+    // baseline); the real default is much higher.
+    Server(int port, const std::string& aof_path, FsyncPolicy policy, size_t num_shards);
     ~Server();
 
     // Binds, listens, and loops accepting connections forever
@@ -28,8 +29,7 @@ private:
     int port_;
     int listen_fd_;
 
-    Store store_;
-    std::mutex store_mutex_;
+    ShardedStore store_;
     Aof aof_;
 
     std::thread sweep_thread_;

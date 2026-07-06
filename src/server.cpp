@@ -13,8 +13,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-Server::Server(int port, const std::string& aof_path, FsyncPolicy policy)
-    : port_(port), listen_fd_(-1), aof_(aof_path, policy) {
+Server::Server(int port, const std::string& aof_path, FsyncPolicy policy, size_t num_shards)
+    : port_(port), listen_fd_(-1), store_(num_shards), aof_(aof_path, policy) {
     load_aof(aof_path);
     sweep_thread_ = std::thread(&Server::run_periodic_sweep, this);
 }
@@ -61,7 +61,6 @@ void Server::load_aof(const std::string& path) {
 void Server::run_periodic_sweep() {
     while (!stop_sweep_) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
-        std::lock_guard<std::mutex> lock(store_mutex_);
         store_.sweep_expired();
     }
 }
@@ -150,28 +149,34 @@ std::string Server::dispatch(const std::vector<std::string>& args) {
     std::transform(cmd.begin(), cmd.end(), cmd.begin(),
                     [](unsigned char c) { return std::toupper(c); });
 
-    std::lock_guard<std::mutex> lock(store_mutex_);
-
     try {
         if (cmd == "PING") {
             return resp::make_simple_string("PONG");
 
         } else if (cmd == "SET") {
             if (args.size() != 3) return resp::make_error("ERR wrong number of arguments for 'SET'");
-            store_.set_string(args[1], args[2]);
-            aof_.append(args); // log verbatim: SET is already replay-safe as-is
-            return resp::make_simple_string("OK");
+            // with_shard_lock: the store mutation and its AOF append
+            // happen under the SAME lock, so a concurrent SET on this
+            // same key can't interleave between them (see
+            // sharded_store.h's comment on why that matters).
+            return store_.with_shard_lock(args[1], [&](Store& s) {
+                s.set_string(args[1], args[2]);
+                aof_.append(args);
+                return resp::make_simple_string("OK");
+            });
 
         } else if (cmd == "GET") {
             if (args.size() != 2) return resp::make_error("ERR wrong number of arguments for 'GET'");
-            auto val = store_.get_string(args[1]);
+            auto val = store_.get_string(args[1]); // read-only, no AOF involved -- no lock-spanning needed
             return val ? resp::make_bulk_string(*val) : resp::make_nil_bulk_string();
 
         } else if (cmd == "DEL") {
             if (args.size() != 2) return resp::make_error("ERR wrong number of arguments for 'DEL'");
-            bool removed = store_.del(args[1]);
-            if (removed) aof_.append(args); // only log if it actually did something
-            return resp::make_integer(removed ? 1 : 0);
+            return store_.with_shard_lock(args[1], [&](Store& s) {
+                bool removed = s.del(args[1]);
+                if (removed) aof_.append(args); // only log if it actually did something
+                return resp::make_integer(removed ? 1 : 0);
+            });
 
         } else if (cmd == "EXISTS") {
             if (args.size() != 2) return resp::make_error("ERR wrong number of arguments for 'EXISTS'");
@@ -183,17 +188,19 @@ std::string Server::dispatch(const std::vector<std::string>& args) {
             try { seconds = std::stoll(args[2]); }
             catch (...) { return resp::make_error("ERR value is not an integer or out of range"); }
 
-            bool ok = store_.expire(args[1], seconds);
-            if (ok) {
-                // Translate to an absolute timestamp before logging —
-                // see aof.h's comment on why relative EXPIRE can't be
-                // logged verbatim (replay days later would be wrong).
-                auto abs_time = store_.expiry_unix_seconds(args[1]);
-                if (abs_time) {
-                    aof_.append({"EXPIREAT", args[1], std::to_string(*abs_time)});
+            return store_.with_shard_lock(args[1], [&](Store& s) {
+                bool ok = s.expire(args[1], seconds);
+                if (ok) {
+                    // Translate to an absolute timestamp before logging —
+                    // see aof.h's comment on why relative EXPIRE can't be
+                    // logged verbatim (replay days later would be wrong).
+                    auto abs_time = s.expiry_unix_seconds(args[1]);
+                    if (abs_time) {
+                        aof_.append({"EXPIREAT", args[1], std::to_string(*abs_time)});
+                    }
                 }
-            }
-            return resp::make_integer(ok ? 1 : 0);
+                return resp::make_integer(ok ? 1 : 0);
+            });
 
         } else if (cmd == "TTL") {
             if (args.size() != 2) return resp::make_error("ERR wrong number of arguments for 'TTL'");
@@ -201,9 +208,11 @@ std::string Server::dispatch(const std::vector<std::string>& args) {
 
         } else if (cmd == "PERSIST") {
             if (args.size() != 2) return resp::make_error("ERR wrong number of arguments for 'PERSIST'");
-            bool ok = store_.persist(args[1]);
-            if (ok) aof_.append(args);
-            return resp::make_integer(ok ? 1 : 0);
+            return store_.with_shard_lock(args[1], [&](Store& s) {
+                bool ok = s.persist(args[1]);
+                if (ok) aof_.append(args);
+                return resp::make_integer(ok ? 1 : 0);
+            });
 
         } else {
             return resp::make_error("ERR unknown command '" + args[0] + "'");

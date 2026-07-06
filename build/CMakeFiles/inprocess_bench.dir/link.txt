@@ -1,0 +1,1 @@
+/usr/bin/c++ -g -arch arm64 -Wl,-search_paths_first -Wl,-headerpad_max_install_names CMakeFiles/inprocess_bench.dir/bench/inprocess_bench.cpp.o CMakeFiles/inprocess_bench.dir/src/sharded_store.cpp.o CMakeFiles/inprocess_bench.dir/src/store.cpp.o -o inprocess_bench

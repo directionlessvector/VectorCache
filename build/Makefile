@@ -142,6 +142,93 @@ kvserver/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kvserver.dir/build.make CMakeFiles/kvserver.dir/build
 .PHONY : kvserver/fast
 
+#=============================================================================
+# Target rules for targets named bench
+
+# Build rule for target.
+bench: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 bench
+.PHONY : bench
+
+# fast build rule for target.
+bench/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench.dir/build.make CMakeFiles/bench.dir/build
+.PHONY : bench/fast
+
+#=============================================================================
+# Target rules for targets named inprocess_bench
+
+# Build rule for target.
+inprocess_bench: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 inprocess_bench
+.PHONY : inprocess_bench
+
+# fast build rule for target.
+inprocess_bench/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/inprocess_bench.dir/build.make CMakeFiles/inprocess_bench.dir/build
+.PHONY : inprocess_bench/fast
+
+#=============================================================================
+# Target rules for targets named sharded_store_test
+
+# Build rule for target.
+sharded_store_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 sharded_store_test
+.PHONY : sharded_store_test
+
+# fast build rule for target.
+sharded_store_test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/build
+.PHONY : sharded_store_test/fast
+
+bench/inprocess_bench.o: bench/inprocess_bench.cpp.o
+.PHONY : bench/inprocess_bench.o
+
+# target to build an object file
+bench/inprocess_bench.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/inprocess_bench.dir/build.make CMakeFiles/inprocess_bench.dir/bench/inprocess_bench.cpp.o
+.PHONY : bench/inprocess_bench.cpp.o
+
+bench/inprocess_bench.i: bench/inprocess_bench.cpp.i
+.PHONY : bench/inprocess_bench.i
+
+# target to preprocess a source file
+bench/inprocess_bench.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/inprocess_bench.dir/build.make CMakeFiles/inprocess_bench.dir/bench/inprocess_bench.cpp.i
+.PHONY : bench/inprocess_bench.cpp.i
+
+bench/inprocess_bench.s: bench/inprocess_bench.cpp.s
+.PHONY : bench/inprocess_bench.s
+
+# target to generate assembly for a file
+bench/inprocess_bench.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/inprocess_bench.dir/build.make CMakeFiles/inprocess_bench.dir/bench/inprocess_bench.cpp.s
+.PHONY : bench/inprocess_bench.cpp.s
+
+bench/load_test.o: bench/load_test.cpp.o
+.PHONY : bench/load_test.o
+
+# target to build an object file
+bench/load_test.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench.dir/build.make CMakeFiles/bench.dir/bench/load_test.cpp.o
+.PHONY : bench/load_test.cpp.o
+
+bench/load_test.i: bench/load_test.cpp.i
+.PHONY : bench/load_test.i
+
+# target to preprocess a source file
+bench/load_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench.dir/build.make CMakeFiles/bench.dir/bench/load_test.cpp.i
+.PHONY : bench/load_test.cpp.i
+
+bench/load_test.s: bench/load_test.cpp.s
+.PHONY : bench/load_test.s
+
+# target to generate assembly for a file
+bench/load_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/bench.dir/build.make CMakeFiles/bench.dir/bench/load_test.cpp.s
+.PHONY : bench/load_test.cpp.s
+
 src/aof.o: src/aof.cpp.o
 .PHONY : src/aof.o
 
@@ -262,6 +349,36 @@ src/server_main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kvserver.dir/build.make CMakeFiles/kvserver.dir/src/server_main.cpp.s
 .PHONY : src/server_main.cpp.s
 
+src/sharded_store.o: src/sharded_store.cpp.o
+.PHONY : src/sharded_store.o
+
+# target to build an object file
+src/sharded_store.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kvserver.dir/build.make CMakeFiles/kvserver.dir/src/sharded_store.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/inprocess_bench.dir/build.make CMakeFiles/inprocess_bench.dir/src/sharded_store.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/src/sharded_store.cpp.o
+.PHONY : src/sharded_store.cpp.o
+
+src/sharded_store.i: src/sharded_store.cpp.i
+.PHONY : src/sharded_store.i
+
+# target to preprocess a source file
+src/sharded_store.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kvserver.dir/build.make CMakeFiles/kvserver.dir/src/sharded_store.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/inprocess_bench.dir/build.make CMakeFiles/inprocess_bench.dir/src/sharded_store.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/src/sharded_store.cpp.i
+.PHONY : src/sharded_store.cpp.i
+
+src/sharded_store.s: src/sharded_store.cpp.s
+.PHONY : src/sharded_store.s
+
+# target to generate assembly for a file
+src/sharded_store.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/kvserver.dir/build.make CMakeFiles/kvserver.dir/src/sharded_store.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/inprocess_bench.dir/build.make CMakeFiles/inprocess_bench.dir/src/sharded_store.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/src/sharded_store.cpp.s
+.PHONY : src/sharded_store.cpp.s
+
 src/store.o: src/store.cpp.o
 .PHONY : src/store.o
 
@@ -269,6 +386,8 @@ src/store.o: src/store.cpp.o
 src/store.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kvstore.dir/build.make CMakeFiles/kvstore.dir/src/store.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kvserver.dir/build.make CMakeFiles/kvserver.dir/src/store.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/inprocess_bench.dir/build.make CMakeFiles/inprocess_bench.dir/src/store.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/src/store.cpp.o
 .PHONY : src/store.cpp.o
 
 src/store.i: src/store.cpp.i
@@ -278,6 +397,8 @@ src/store.i: src/store.cpp.i
 src/store.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kvstore.dir/build.make CMakeFiles/kvstore.dir/src/store.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kvserver.dir/build.make CMakeFiles/kvserver.dir/src/store.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/inprocess_bench.dir/build.make CMakeFiles/inprocess_bench.dir/src/store.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/src/store.cpp.i
 .PHONY : src/store.cpp.i
 
 src/store.s: src/store.cpp.s
@@ -287,7 +408,33 @@ src/store.s: src/store.cpp.s
 src/store.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kvstore.dir/build.make CMakeFiles/kvstore.dir/src/store.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/kvserver.dir/build.make CMakeFiles/kvserver.dir/src/store.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/inprocess_bench.dir/build.make CMakeFiles/inprocess_bench.dir/src/store.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/src/store.cpp.s
 .PHONY : src/store.cpp.s
+
+tests/sharded_store_test.o: tests/sharded_store_test.cpp.o
+.PHONY : tests/sharded_store_test.o
+
+# target to build an object file
+tests/sharded_store_test.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/tests/sharded_store_test.cpp.o
+.PHONY : tests/sharded_store_test.cpp.o
+
+tests/sharded_store_test.i: tests/sharded_store_test.cpp.i
+.PHONY : tests/sharded_store_test.i
+
+# target to preprocess a source file
+tests/sharded_store_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/tests/sharded_store_test.cpp.i
+.PHONY : tests/sharded_store_test.cpp.i
+
+tests/sharded_store_test.s: tests/sharded_store_test.cpp.s
+.PHONY : tests/sharded_store_test.s
+
+# target to generate assembly for a file
+tests/sharded_store_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/sharded_store_test.dir/build.make CMakeFiles/sharded_store_test.dir/tests/sharded_store_test.cpp.s
+.PHONY : tests/sharded_store_test.cpp.s
 
 # Help Target
 help:
@@ -297,8 +444,17 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... bench"
+	@echo "... inprocess_bench"
 	@echo "... kvserver"
 	@echo "... kvstore"
+	@echo "... sharded_store_test"
+	@echo "... bench/inprocess_bench.o"
+	@echo "... bench/inprocess_bench.i"
+	@echo "... bench/inprocess_bench.s"
+	@echo "... bench/load_test.o"
+	@echo "... bench/load_test.i"
+	@echo "... bench/load_test.s"
 	@echo "... src/aof.o"
 	@echo "... src/aof.i"
 	@echo "... src/aof.s"
@@ -314,9 +470,15 @@ help:
 	@echo "... src/server_main.o"
 	@echo "... src/server_main.i"
 	@echo "... src/server_main.s"
+	@echo "... src/sharded_store.o"
+	@echo "... src/sharded_store.i"
+	@echo "... src/sharded_store.s"
 	@echo "... src/store.o"
 	@echo "... src/store.i"
 	@echo "... src/store.s"
+	@echo "... tests/sharded_store_test.o"
+	@echo "... tests/sharded_store_test.i"
+	@echo "... tests/sharded_store_test.s"
 .PHONY : help
 
 

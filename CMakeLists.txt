@@ -29,7 +29,33 @@ add_executable(kvserver
     src/server.cpp
     src/resp.cpp
     src/aof.cpp
+    src/sharded_store.cpp
     src/store.cpp
 )
 target_include_directories(kvserver PRIVATE src)
 target_link_libraries(kvserver PRIVATE Threads::Threads)
+
+# Benchmark client
+add_executable(bench
+    bench/load_test.cpp
+)
+target_include_directories(bench PRIVATE src)
+target_link_libraries(bench PRIVATE Threads::Threads)
+
+# In-process benchmark
+add_executable(inprocess_bench
+    bench/inprocess_bench.cpp
+    src/sharded_store.cpp
+    src/store.cpp
+)
+target_include_directories(inprocess_bench PRIVATE src)
+target_link_libraries(inprocess_bench PRIVATE Threads::Threads)
+
+# Unit tests
+add_executable(sharded_store_test
+    tests/sharded_store_test.cpp
+    src/sharded_store.cpp
+    src/store.cpp
+)
+target_include_directories(sharded_store_test PRIVATE src)
+target_link_libraries(sharded_store_test PRIVATE Threads::Threads)
